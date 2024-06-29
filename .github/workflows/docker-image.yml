@@ -7,7 +7,7 @@ on:
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-${{ github.sha }}
 
     steps:
       - name: Checkout repository
@@ -26,10 +26,18 @@ jobs:
 
       - name: Build and push Web App image
         run: |
-          docker build -t ${{ secrets.AZURE_ACR_LOGIN_SERVER }}/webapp:latest -f web/Dockerfile .
-          docker push ${{ secrets.AZURE_ACR_LOGIN_SERVER }}/webapp:latest
+          docker build -t ${{ secrets.AZURE_ACR_LOGIN_SERVER }}/webapp:${{ github.sha }} -f web/Dockerfile .
+          docker push ${{ secrets.AZURE_ACR_LOGIN_SERVER }}/webapp:${{ github.sha }}
 
       - name: Build and push Web App image
         run: |
-          docker build -t ${{ secrets.AZURE_ACR_LOGIN_SERVER }}/webapp2:latest -f api/Dockerfile .
-          docker push ${{ secrets.AZURE_ACR_LOGIN_SERVER }}/webapp2:latest
+          docker build -t ${{ secrets.AZURE_ACR_LOGIN_SERVER }}/api:${{ github.sha }} -f api/Dockerfile .
+          docker push ${{ secrets.AZURE_ACR_LOGIN_SERVER }}/api:${{ github.sha }}
+
+      - name: Deploy web app to Azure App Service
+        run: |
+           az appservice webapp deploy --resource-group ${{ secrets.RESOURCE_GROUP }} --name webapp --plan ${{ secrets.APP_SERVICE_PLAN }} --image ${{ secrets.AZURE_ACR_LOGIN_SERVER }}/webapp:${{ github.sha }}
+  
+      - name: Deploy API to Azure App Service
+        run: |
+           az appservice webapp deploy --resource-group ${{ secrets.RESOURCE_GROUP }} --name api --plan ${{ secrets.APP_SERVICE_PLAN }} --image ${{ secrets.AZURE_ACR_LOGIN_SERVER }}/api:${{ github.sha }} 

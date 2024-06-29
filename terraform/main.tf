@@ -28,7 +28,7 @@ module "acr" {
   
 }
 
-module "webapp1" {
+module "webapp" {
   source              = "./modules/webapp"
   resource_group_name = var.resource_group_name
   location            = var.location
@@ -37,12 +37,12 @@ module "webapp1" {
   docker_registry     = module.acr.acr_login_server
   docker_image        = "webapp"
   docker_image_tag    = "latest"
-  app_name            = "wireapps-webapp1"
+  app_name            = "wireapps-webapp"
   websites_port       = "5000"
 }
 
-module "webapp2" {
-  source              = "./modules/webapp"
+module "api" {
+  source              = "./modules/api"
   resource_group_name = var.resource_group_name
   location            = var.location
   app_service_plan_id = module.network.app_service_plan_id
@@ -50,6 +50,6 @@ module "webapp2" {
   docker_registry     = module.acr.acr_login_server
   docker_image        = "api"
   docker_image_tag    = "latest"
-  app_name            = "wireapps-webapp2"
+  app_name            = "wireapps-api"
   websites_port       = "5000"
 }
